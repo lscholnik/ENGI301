@@ -7,3 +7,4 @@ To run the program from the commandline, use "python3 projectthread.py". Be awar
 All user inputs are done through the six buttons.
 
 See the "STL file for movement arm" folder within the "docs" folder for 3d printable arms. See also on my Hackster.io page for this project:
+https://www.hackster.io/lms20/mechanically-actuated-shadow-puppets-using-pocketbeagle-145bd1
