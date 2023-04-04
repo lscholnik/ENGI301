@@ -5,3 +5,5 @@ For the files associated with "Mechanically actuated shadow puppets using Pocket
 To run the program from the commandline, use "python3 projectthread.py". Be aware that the puppets/servos will likely turn upon initiation, and therefore the servos must not be blocked by anything. If the file is run this way, you must also exit by using "ctrl c" three times. Failing to do so will initiate the stepper motors and the speaker.
 
 All user inputs are done through the six buttons.
+
+See the "STL file for movement arm" folder within the "docs" folder for 3d printable arms. See also on my Hackster.io page for this project:
