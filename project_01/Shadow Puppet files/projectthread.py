@@ -1,11 +1,9 @@
 """
 --------------------------------------------------------------------------
-This whole thing was my attempt at making the servo turn with a button press
-Servo Driver --> was having issues with importing, which is why I copy and 
-pasted all of my things together like an idiot
+Driver for servos, steppers, and USB speaker for shadow puppet project
 --------------------------------------------------------------------------
 License:   
-Copyright 2021-2023 - Lily Scholnik
+Copyright 2023 - Lily Scholnik
 
 Redistribution and use in source and binary forms, with or without 
 modification, are permitted provided that the following conditions are met:
@@ -88,23 +86,20 @@ class Servo():
     def _setup(self, default_position):
         """Setup the hardware components."""
         # Initialize Servo; Servo should be "off"
-        
         PWM.start(self.pin, self._duty_cycle_from_position(default_position), SG90_FREQ, SG90_POL)
-        
-        
+      
         # Set default position
         self.turn(default_position)
-
     # End def
 
     def _duty_cycle_from_position(self, position):
         """ Compute the duty cycle from the position """
         return ((SG90_MAX_DUTY - SG90_MIN_DUTY) * (position / 100)) + SG90_MIN_DUTY
+    # End def
     
     def get_position(self):
         """ Return the position of the servo """
         return self.position
-    
     # End def
     
 
@@ -116,26 +111,21 @@ class Servo():
         """
         # Record the current position
         self.position = position
-        #print("I turned {}".format(position))
         
         # Set PWM duty cycle based on position
         #duty_cycle = ((SG90_MAX_DUTY - SG90_MIN_DUTY) * (position / 100)) + SG90_MIN_DUTY
         
         PWM.set_duty_cycle(self.pin, self._duty_cycle_from_position(position))
-        #print("Turning servo to position {0} using duty cycle {1}".format(position, duty_cycle))
-        # !!! NEED TO IMPLEMENT !!! #
-
+        #print("Turning servo to position {0} using duty cycle {1}".format(position, duty_cycle)
     # End def
 
     def button_1_functions(self):
-        
-        #current_func = button_functions[self.button_index]
+      #Function allows buttons 1-3 to switch the mode of the servo with each press. 
+      #Indexing allows this function to be called for each of the button/servo combinations without each of them interferring with each other
         self.button_index = (self.button_index + 1) % 2
         
         self.turn(int(100*self.button_index))
         time.sleep(0.3)        
-        
-        #current_func()
     # End def
     
     def cleanup(self):
@@ -143,112 +133,17 @@ class Servo():
         # Stop servo
         PWM.stop(self.pin)
         PWM.cleanup()
-        
     # End def
 
 # End class
 
-'''
-""" 
-From petebachant
-
-**need to change pins?
-my pins are: 
-
-bbpystepper is a Python module used to control a stepper motor via the 
-BeagleBone
-
-"""
-
-from __future__ import division
-import Adafruit_BBIO.GPIO as GPIO
-import time
-import math
-
-
-def initialize_pins(pins):
-    for pin in pins:
-        GPIO.setup(pin, GPIO.OUT)
-
-def set_all_pins_low(pins):
-    for pin in pins:
-        GPIO.output(pin, GPIO.LOW)
-        
-def wavedrive(pins, pin_index):
-    for i in range(len(pins)):
-        if i == pin_index:
-            GPIO.output(pins[i], GPIO.HIGH)
-        else:
-            GPIO.output(pins[i], GPIO.LOW)
-
-def fullstep(pins, pin_index):
-    """pin_index is the lead pin"""
-    GPIO.output(pins[pin_index], GPIO.HIGH)
-    GPIO.output(pins[(pin_index+3) % 4], GPIO.HIGH)
-    GPIO.output(pins[(pin_index+1) % 4], GPIO.LOW)
-    GPIO.output(pins[(pin_index+2) % 4], GPIO.LOW)
-
-
-class Stepper(object):
-    def __init__(self, steps_per_rev=2048.0,
-                 pins=["P2_1", "P2_2"]):
-
-        self.pins = pins
-        
-        initialize_pins(self.pins)
-        set_all_pins_low(self.pins)
-        
-        self.angle = 0
-        self.steps_per_rev = steps_per_rev
-        
-        # Initialize stepping mode
-        self.drivemode = fullstep
-    
-    def rotate(self, degrees=360, rpm=15):
-        step = 0
-        
-        # Calculate time between steps in seconds
-        wait_time = 60.0/(self.steps_per_rev*rpm)
-        
-        # Convert degrees to steps
-        steps = math.fabs(degrees*self.steps_per_rev/360.0)
-        self.direction = 1
-        
-        if degrees < 0:
-            self.pins.reverse()
-            self.direction = -1
-        
-        while step < steps:
-            for pin_index in range(len(self.pins)):
-                self.drivemode(self.pins, pin_index)
-                time.sleep(wait_time)
-                step += 1
-                self.angle = (self.angle + self.direction/self.steps_per_rev \
-                *360.0) % 360.0
-        
-        if degrees < 0:
-            self.pins.reverse()
-    	
-        set_all_pins_low(self.pins)
-        
-    def zero_angle(self):
-        self.angle = 0
-        
-
-def main():
-    stepper = Stepper()
-    stepper.rotate()
-    
-
-if __name__ == "__main__":
-    main()
-    
-'''    
-    
     
 #!/usr/bin/env python3
 """A python 3 library for various
  motors and servos to connect to a raspberry pi"""
+
+#This library was adapted by Lily Scholnik from Gavin Lyons. See project_01's README for the link to the original library.
+
 # ========================= HEADER ===================================
 # title             :rpiMotorlib.py
 # description       :A python 3 library for various motors
@@ -433,38 +328,9 @@ def degree_calc(steps, steptype):
 --------------------------------------------------------------------------
 Threaded Button Driver
 --------------------------------------------------------------------------
-License:   
-Copyright 2023 - Erik Welsh
-
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this 
-list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice, 
-this list of conditions and the following disclaimer in the documentation 
-and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors 
-may be used to endorse or promote products derived from this software without 
-specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE 
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
---------------------------------------------------------------------------
-
 Threaded Button Driver
 
-  This driver provides a button that runs in its own execution thread.
+  This driver provides buttons that run in their own execution thread.
   
 
 Software API:
@@ -616,11 +482,13 @@ class ThreadedButton(threading.Thread):
     #^old format, did not work because both functions would get called at once each time. Servo driver section has working version
     
     def bat1(self):
-        #this will be where i put the stepper motor movement sequence for the first scene
-        print("schmeep schmoop")
+        #Movement sequence 1 for the shadow puppet attached to the stepper/arm system. Associated with button 4.
+        
+        #Initiation of each stepper:
         stepper_1 = A4988Nema('P2_4', 'P2_2', "P2_10", (-1,-1,-1), motor_type="A4988")
         stepper_2 = A4988Nema('P2_6', 'P2_8', "P2_18", (-1,-1,-1), motor_type="A4988")
 
+        #Movement commands for steppers. Use bat1 to test arm 1, uncomment stepper_2 line for formatting a movement sequence after testing
         stepper_1.motor_go(clockwise=False, steptype="Full",
                  steps=30, stepdelay=.005, verbose=True, initdelay=.05)
         stepper_1.motor_go(clockwise=True, steptype="Full",
@@ -631,11 +499,13 @@ class ThreadedButton(threading.Thread):
     #end def
     
     def bat2(self):
-        #second scene
-        print("bat 2 functions")
+        #second movement sequence for puppet attached to stepper/arm system. Associated with button 5.
+
+        #Stepper initiation:
         stepper_1 = A4988Nema('P2_4', 'P2_2', "P2_10", (-1,-1,-1), motor_type="A4988")
         stepper_2 = A4988Nema('P2_6', 'P2_8', "P2_18", (-1,-1,-1), motor_type="A4988")
         
+        #Movement commands. Uncomment stepper_1 if you would like the sequence to use arm 1. Use bat2 in this form to test the belted arm.
         #stepper_1.motor_go(clockwise=False, steptype="Full",
                  #steps=20, stepdelay=.005, verbose=True, initdelay=.05)
         stepper_2.motor_go(clockwise=True, steptype="Full",
@@ -646,11 +516,9 @@ class ThreadedButton(threading.Thread):
     #end def
     
     def sound(self):
+      #Plays the sound specified. Note that there is a time delay as it loads. Associated with button 6.
         os.system("mplayer batsound.mp3")
         time.sleep(1)
-        
-    #def unsound(self):
-        #os.system()
         
 
     def run(self):
@@ -785,7 +653,7 @@ class ThreadedButton(threading.Thread):
 
 
 # ------------------------------------------------------------------------
-# Main script
+# Main script  --  Drives the puppet show with 6 buttons
 # ------------------------------------------------------------------------
 
 if __name__ == '__main__':
@@ -797,12 +665,7 @@ if __name__ == '__main__':
     """
     import sys
 
-    # Update path to correct directory for LED class     
-    sys.path.append("/var/lib/cloud9/ENGI-301/python/servo")
-    
-    print("Threaded Button Test")
-
-    # Create instantiation of the buttons and LEDs
+    # Create instantiation of the buttons
     button_1 = ThreadedButton("P1_2")
     button_2 = ThreadedButton("P1_4")
     button_3 = ThreadedButton("P1_6")
@@ -814,17 +677,11 @@ if __name__ == '__main__':
         import servo as SERVO
         import os
         
-        #servo_1    = SERVO.SERVO("P1_36", 100)
-        #servo_2    = SERVO.SERVO("P1_33", 100)
-        #servo_3    = SERVO.SERVO("P2_1", 100)
         servo_1 = Servo("P1_36", 0)
         servo_2 = Servo("P1_33", 0)
         servo_3 = Servo("P2_1", 0)
 
         # Set up the button callbacks
-        #button_0.set_on_press_callback(led_0.on)
-        #button_0.set_on_release_callback(led_0.off)
-        #button_2.set_on_press_callback(os.system("mplayer Dustin.mp3"))
         button_1.set_on_press_callback(servo_1.button_1_functions)
         button_2.set_on_press_callback(servo_2.button_1_functions)
         button_3.set_on_press_callback(servo_3.button_1_functions)
@@ -860,7 +717,7 @@ if __name__ == '__main__':
         button_3.cleanup()
         button_4.cleanup()
         button_5.cleanup()
-        #button_6.cleanup()
+        button_6.cleanup()
 
         try:
             servo_1.cleanup()
